@@ -95,10 +95,6 @@ npm run build
 - esbuild
 - 嘉立创 EDA 专业版扩展 API（@jlceda/pro-api-types）
 
-## 致谢
-
-本项目基于 [JLCEDA-Design-Copilot](https://github.com/sengbin/JLCEDA-Design-Copilot) 改造，感谢原作者的开源贡献。
-
 ## 许可证
 
 [Apache License 2.0](LICENSE)

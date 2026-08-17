@@ -25,6 +25,18 @@
         </g>
     </symbol>
 
+    <symbol id="icon-chevron-left" viewBox="0 0 20 20">
+        <g transform="translate(5 0) scale(1.4285714)">
+            <path d="M6 2 L1 7 L6 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        </g>
+    </symbol>
+
+    <symbol id="icon-chevron-right" viewBox="0 0 20 20">
+        <g transform="translate(2 0) scale(1.4285714)">
+            <path d="M1 2 L6 7 L1 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        </g>
+    </symbol>
+
     <symbol id="icon-send-triangle" viewBox="0 0 20 20">
         <g transform="scale(0.7142857)">
             <g transform="translate(14 14) scale(0.9) translate(-14 -14)">

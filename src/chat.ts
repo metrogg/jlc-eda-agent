@@ -17,6 +17,7 @@ import { applyTheme, setupThemeSync } from './page/theme';
 import { buildUserMessageContentForApi, cloneDocumentEntries, cloneImageEntries, collectClipboardImageFiles, convertDocumentFileToEntry, convertImageFileToEntry, DOCUMENT_ATTACHMENT_LIMIT, isGenericClipboardImageName, resolveImageEntryName } from './page/upload';
 import { readPlatformConfigs } from './platform/platform';
 import { createChatSessionManager } from './session/session';
+import { applyComponentDeleteInteraction } from './tools/component-delete-ui';
 import { applyComponentPlaceInteraction } from './tools/component-place-ui';
 import { applyComponentSelectInteraction } from './tools/component-select-ui';
 import { createAgentToolRuntime, executeToolWithTimeout } from './tools/executor';
@@ -35,17 +36,10 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 	const CHAT_SESSION_MAX_MESSAGES: any = 120;
 	const CHAT_SESSION_DEFAULT_TITLE: any = '新对话';
 	const CHAT_EMPTY_STATE_TITLE_TEXT: any = 'JLC EDA Agent';
-	const CHAT_EMPTY_STATE_NOTICE_TEXT: any = '我是个辅助工具，也可能会出错，请注意核对结果。';
-	const CHAT_EMPTY_STATE_EXAMPLES: any = [
-		'帮我检查一下这个原理图。',
-		'这个电路有什么可以优化的地方吗？',
-		'给我设计一个点亮LED的电路。',
-	];
+	const CHAT_EMPTY_STATE_NOTICE_TEXT: any = '读取电路、审查设计、辅助选型，关键决策请结合 datasheets 与工程经验复核。';
 	const RUNNING_INDICATOR_TEXT: any = '运行中';
-	const imageUploadButton: any = document.querySelector('.image-upload-button');
-	const imageUploadInput: any = document.querySelector('.image-upload-input');
-	const documentUploadButton: any = document.querySelector('.document-upload-button');
-	const documentUploadInput: any = document.querySelector('.document-upload-input');
+	const fileUploadButton: any = document.querySelector('.file-upload-button');
+	const fileUploadInput: any = document.querySelector('.file-upload-input');
 	const modelSelect: any = document.querySelector('.model-select');
 	// 获取当前选中的模型值。
 	function getSelectedModelValue() {
@@ -55,15 +49,9 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 	// 根据模型切换图片上传控件可用性。
 	function updateImageUploadAvailability(modelValue?: any) {
 		const enabled: any = isImageUploadEnabled(modelValue);
-		const attachmentRow: any = imageUploadButton ? imageUploadButton.parentElement : null;
+		const attachmentRow: any = fileUploadButton ? fileUploadButton.parentElement : null;
 		if (attachmentRow) {
 			attachmentRow.style.display = 'flex';
-		}
-		if (imageUploadInput) {
-			imageUploadInput.disabled = !enabled;
-			if (!enabled) {
-				imageUploadInput.value = '';
-			}
 		}
 		if (!enabled) {
 			clearPendingImageEntries();
@@ -85,11 +73,11 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 	const modelSelectControl: any = document.querySelector('.model-select-control');
 	const modelSelectTrigger: any = document.querySelector('.model-select-trigger');
 	const modelSelectMenu: any = document.querySelector('.model-select-menu');
-	const chatSessionDropdown: any = document.querySelector('.chat-sesson-dropdown');
-	const chatSessionDropdownCurrent: any = document.querySelector('.chat-sesson-dropdown-current');
-	const chatSessionDropdownMenu: any = document.querySelector('.chat-sesson-dropdown-menu');
-	const chatSessionAddButton: any = document.querySelector('.chat-sesson-add-button');
-	const chatSessionDeleteButton: any = document.querySelector('.chat-sesson-delete-button');
+	const chatSidebar: any = document.querySelector('.chat-sidebar');
+	const chatSidebarList: any = document.querySelector('.chat-sidebar-list');
+	const chatSidebarNewButton: any = document.querySelector('.chat-sidebar-new-button');
+	const chatSidebarToggle: any = document.querySelector('.chat-sidebar-toggle');
+	const chatSidebarExpand: any = document.querySelector('.chat-sidebar-expand');
 	const chatContextMenu: any = document.querySelector('.chat-context-menu');
 	const agentMessages: any = [];
 	const chatDisplayMessages: any = [];
@@ -114,8 +102,9 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 	let chatHistoryScrollController: any = null;
 	const chatVListStore: ChatVListStore = createChatVListStore();
 	let chatVListEngine: ChatVListEngine | null = null;
-	let chatSessionDropdownScrollController: any = null;
 	let chatInputOverlayScrollbar: any = null;
+	let chatSidebarCollapsed: any = false;
+	const CHAT_SIDEBAR_COLLAPSED_KEY: any = 'jlc-eda-agent-chat-sidebar-collapsed';
 	let imageAttachmentHoverPreviewLayer: any = null;
 	let imageAttachmentHoverPreviewImage: any = null;
 	let imageAttachmentHoverPreviewName: any = null;
@@ -575,28 +564,7 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 		}
 		const emptyStateNode: any = document.createElement('div');
 		emptyStateNode.className = 'chat-empty-state';
-		const examplesHtml: any = CHAT_EMPTY_STATE_EXAMPLES
-			.map((exampleText: any) => `<li><button type="button" class="chat-empty-state-example-button" data-example-text="${escapeHtml(exampleText)}">${escapeHtml(exampleText)}</button></li>`)
-			.join('');
-		emptyStateNode.innerHTML = `<div class="chat-empty-state-card"><div class="chat-empty-state-logo" aria-hidden="true"><img src="/images/logo.png" alt="" /></div><div class="chat-empty-state-title">${escapeHtml(CHAT_EMPTY_STATE_TITLE_TEXT)}</div><div class="chat-empty-state-desc chat-empty-state-desc-primary">${escapeHtml(CHAT_EMPTY_STATE_NOTICE_TEXT)}</div></div><ul class="chat-empty-state-examples" aria-label="示例问题">${examplesHtml}</ul>`;
-		emptyStateNode.addEventListener('click', (event?: any) => {
-			const target: any = event && event.target ? event.target : null;
-			const buttonElement: any = target && target.closest ? target.closest('.chat-empty-state-example-button') : null;
-			if (!buttonElement) {
-				return;
-			}
-			if (!chatEditor) {
-				return;
-			}
-			const exampleText: any = String(buttonElement.getAttribute('data-example-text') || '').trim();
-			if (!exampleText) {
-				return;
-			}
-			writeChatInputText(exampleText);
-			adjustChatInputHeight();
-			updateSendButtonState();
-			chatEditor.focus();
-		});
+		emptyStateNode.innerHTML = `<div class="chat-empty-state-card"><div class="chat-empty-state-logo" aria-hidden="true"><img src="/images/logo.png" alt="" /></div><div class="chat-empty-state-title">${escapeHtml(CHAT_EMPTY_STATE_TITLE_TEXT)}</div><div class="chat-empty-state-desc chat-empty-state-desc-primary">${escapeHtml(CHAT_EMPTY_STATE_NOTICE_TEXT)}</div></div>`;
 		chatHistoryElement.appendChild(emptyStateNode);
 		return emptyStateNode;
 	}
@@ -606,21 +574,12 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 	}
 	// 刷新对话工具栏按钮可用状态。
 	function updateChatSessionActionButtonState() {
-		const hasAnySession: any = sessionManager.hasAnyChatSession();
-		const activeSessionId: any = sessionManager.getActiveChatSessionId();
-		if (chatSessionAddButton) {
-			const addDisabled: any = isSending || isRestoringSession;
-			chatSessionAddButton.disabled = addDisabled;
-			const addTitle: any = addDisabled ? '对话进行中，无法新建对话' : '新建对话';
-			chatSessionAddButton.title = addTitle;
-			chatSessionAddButton.setAttribute('aria-label', addTitle);
-		}
-		if (chatSessionDeleteButton) {
-			const deleteDisabled: any = isSending || isRestoringSession || !hasAnySession || !activeSessionId;
-			chatSessionDeleteButton.disabled = deleteDisabled;
-			const deleteTitle: any = (isSending || isRestoringSession) ? '对话进行中，无法删除对话' : '删除对话';
-			chatSessionDeleteButton.title = deleteTitle;
-			chatSessionDeleteButton.setAttribute('aria-label', deleteTitle);
+		const addDisabled: any = isSending || isRestoringSession;
+		const addTitle: any = addDisabled ? '对话进行中，无法新建对话' : '新建对话';
+		if (chatSidebarNewButton) {
+			chatSidebarNewButton.disabled = addDisabled;
+			chatSidebarNewButton.title = addTitle;
+			chatSidebarNewButton.setAttribute('aria-label', addTitle);
 		}
 	}
 	// 同步聊天空状态的显示与隐藏。
@@ -921,13 +880,6 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 	function getItemDomNode(itemId: string): HTMLElement | null {
 		return chatVListEngine ? chatVListEngine.getItemNode(itemId) : null;
 	}
-	// 关闭对话下拉列表。
-	function closeChatSessionDropdown() {
-		if (!chatSessionDropdown || !(chatSessionDropdown instanceof HTMLDetailsElement)) {
-			return;
-		}
-		chatSessionDropdown.open = false;
-	}
 	// 格式化会话时间。
 	function formatChatSessionTime(updatedAt?: any) {
 		const timestamp: any = Number(updatedAt || 0);
@@ -942,7 +894,7 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 		return `${dateObject.getFullYear()}/${pad(dateObject.getMonth() + 1)}/${pad(dateObject.getDate())
 		} ${pad(dateObject.getHours())}:${pad(dateObject.getMinutes())}`;
 	}
-	// 创建单个会话下拉选项节点。
+	// 创建单个会话选项节点。
 	function createChatSessionOptionElement(sessionItem?: any, isActive?: any) {
 		const listItem: any = document.createElement('li');
 		const optionButton: any = document.createElement('button');
@@ -964,36 +916,40 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 		optionButton.appendChild(iconSpan);
 		optionButton.appendChild(titleSpan);
 		optionButton.appendChild(timeSpan);
+		if (sessionItem && sessionItem.id) {
+			const deleteButton: any = document.createElement('button');
+			deleteButton.className = 'chat-sesson-delete';
+			deleteButton.type = 'button';
+			deleteButton.title = '删除对话';
+			deleteButton.setAttribute('aria-label', '删除对话');
+			deleteButton.setAttribute('data-action', 'delete-session');
+			deleteButton.innerHTML = '<svg viewBox="0 0 20 20" focusable="false" aria-hidden="true"><use xlink:href="#icon-delete-chat-history"></use></svg>';
+			optionButton.appendChild(deleteButton);
+		}
 		listItem.appendChild(optionButton);
 		return listItem;
 	}
-	// 重新渲染会话下拉列表。
-	function renderChatSessionDropdownOptions() {
-		if (!chatSessionDropdownMenu) {
+	// 重新渲染会话侧边栏列表。
+	function renderChatSessionList() {
+		if (!chatSidebarList) {
 			return;
 		}
-		const dropdownRenderContainer: any = chatSessionDropdownScrollController
-			? chatSessionDropdownScrollController.getContentBodyElement()
-			: chatSessionDropdownMenu;
 		const sessionList: any = sessionManager.listChatSessions();
 		const activeSessionId: any = sessionManager.getActiveChatSessionId();
 		const usingDefaultPlaceholder: any = !activeSessionId;
-		dropdownRenderContainer.innerHTML = '';
+		chatSidebarList.innerHTML = '';
 		if (sessionList.length === 0) {
 			const defaultItem: any = createChatSessionOptionElement({
 				id: '',
 				title: CHAT_SESSION_DEFAULT_TITLE,
 				updatedAt: 0,
 			}, true);
-			dropdownRenderContainer.appendChild(defaultItem);
-			if (chatSessionDropdownCurrent) {
-				chatSessionDropdownCurrent.textContent = CHAT_SESSION_DEFAULT_TITLE;
-			}
+			chatSidebarList.appendChild(defaultItem);
 			updateChatSessionActionButtonState();
 			return;
 		}
 		if (usingDefaultPlaceholder) {
-			dropdownRenderContainer.appendChild(createChatSessionOptionElement({
+			chatSidebarList.appendChild(createChatSessionOptionElement({
 				id: '',
 				title: CHAT_SESSION_DEFAULT_TITLE,
 				updatedAt: 0,
@@ -1006,27 +962,14 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 			if (isActive) {
 				hasActiveOption = true;
 			}
-			dropdownRenderContainer.appendChild(createChatSessionOptionElement(item, isActive));
+			chatSidebarList.appendChild(createChatSessionOptionElement(item, isActive));
 		}
-		if (!usingDefaultPlaceholder && !hasActiveOption && dropdownRenderContainer.firstElementChild) {
-			const fallbackOption: any = dropdownRenderContainer.firstElementChild.querySelector('.chat-sesson-option');
+		if (!usingDefaultPlaceholder && !hasActiveOption && chatSidebarList.firstElementChild) {
+			const fallbackOption: any = chatSidebarList.firstElementChild.querySelector('.chat-sesson-option');
 			if (fallbackOption) {
 				fallbackOption.classList.add('is-active');
 				fallbackOption.setAttribute('aria-selected', 'true');
 			}
-		}
-		if (usingDefaultPlaceholder) {
-			if (chatSessionDropdownCurrent) {
-				chatSessionDropdownCurrent.textContent = CHAT_SESSION_DEFAULT_TITLE;
-			}
-			updateChatSessionActionButtonState();
-			return;
-		}
-		const activeOption: any = chatSessionDropdownMenu.querySelector('.chat-sesson-option.is-active')
-			|| chatSessionDropdownMenu.querySelector('.chat-sesson-option');
-		if (chatSessionDropdownCurrent && activeOption) {
-			const titleElement: any = activeOption.querySelector('.chat-sesson-option-title');
-			chatSessionDropdownCurrent.textContent = String(titleElement && titleElement.textContent ? titleElement.textContent : CHAT_SESSION_DEFAULT_TITLE);
 		}
 		updateChatSessionActionButtonState();
 	}
@@ -1066,14 +1009,31 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 			);
 		}
 	}
-	if (chatSessionDropdownMenu) {
-		chatSessionDropdownScrollController = ensureOverlayScrollController(chatSessionDropdownMenu, {
-			bottomSnapThreshold: 0,
-			allowHorizontalScroll: false,
-			autoHideMode: 'leave',
-			autoFollowEnabled: false,
-		});
+	function readChatSidebarCollapsedState() {
+		try {
+			const storedValue: any = window.localStorage.getItem(CHAT_SIDEBAR_COLLAPSED_KEY);
+			chatSidebarCollapsed = storedValue === 'true';
+		}
+		catch {
+			chatSidebarCollapsed = false;
+		}
+		if (chatSidebar) {
+			chatSidebar.classList.toggle('is-collapsed', chatSidebarCollapsed);
+		}
 	}
+	function setChatSidebarCollapsed(collapsed: boolean) {
+		chatSidebarCollapsed = collapsed;
+		try {
+			window.localStorage.setItem(CHAT_SIDEBAR_COLLAPSED_KEY, String(collapsed));
+		}
+		catch {
+			/* ignore */
+		}
+		if (chatSidebar) {
+			chatSidebar.classList.toggle('is-collapsed', collapsed);
+		}
+	}
+	readChatSidebarCollapsedState();
 	// 待发送附件列表改为多行换行展示，不启用滚动容器包装。
 	// 切换发送状态并更新按钮表现。
 	function setSending(sending?: any) {
@@ -2599,6 +2559,20 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 						if (componentPlaceFinalResult !== null) {
 							result = componentPlaceFinalResult;
 						}
+						const componentDeleteFinalResult: any = await applyComponentDeleteInteraction({
+							toolResult: result,
+							messageNode: toolMessageDomNode as HTMLElement,
+							abortSignal,
+							onBeforeShow: () => {
+								const displayDeleteResult: any = buildToolExecDisplayResult(toolName, result);
+								setMessageContent(toolMessageDomNode, 'ai', formatToolExecRawText(displayToolCall, displayDeleteResult, false), 'tool-exec');
+								setMessageFoldOpen(toolMessageDomNode, true);
+							},
+							onMounted: () => forceScrollChatHistoryToBottom(),
+						});
+						if (componentDeleteFinalResult !== null) {
+							result = componentDeleteFinalResult;
+						}
 						const displayToolResult: any = buildToolExecDisplayResult(toolName, result);
 						const displayToolResultText: any = formatToolExecRawText(displayToolCall, displayToolResult, false);
 						// 先更新 store，确保归入分组的节点触发 notifyItemUpdated 时也能拿到正确文本。
@@ -2708,7 +2682,7 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 		const roundModelText: any = buildRoundModelText(modelName);
 		const sessionPrepareResult: any = sessionManager.ensureActiveChatSessionForUserMessage(userText);
 		if (sessionPrepareResult && (sessionPrepareResult.created || sessionPrepareResult.titleUpdated)) {
-			renderChatSessionDropdownOptions();
+			renderChatSessionList();
 		}
 		if (hasCompletedRound && chatDisplayMessages.length > 0) {
 			appendMessage('ai', 'round-separator', 'round-separator');
@@ -2763,7 +2737,7 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 				hasCompletedRound = true;
 			}
 			sessionManager.persistChatSessionNow();
-			renderChatSessionDropdownOptions();
+			renderChatSessionList();
 			clearFoldLoadingIndicators();
 			setSending(false);
 			if (chatEditor) {
@@ -2935,41 +2909,80 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 			}
 		});
 	}
-	if (imageUploadButton && imageUploadInput) {
-		imageUploadButton.addEventListener('click', () => {
-			const selectedModel: any = getSelectedModelValue();
-			if (!isImageUploadEnabled(selectedModel)) {
-				if (String(selectedModel || '').trim() === 'deepseek') {
-					showEdaToastMessage(window, 'DeepSeek 不支持图片上传。', messageType.error);
+	if (fileUploadButton && fileUploadInput) {
+		fileUploadButton.addEventListener('click', () => {
+			fileUploadInput.click();
+		});
+		fileUploadInput.addEventListener('change', async (event?: any) => {
+			const target: any = event.target;
+			const fileList: any = target && target.files ? Array.from(target.files) : [];
+			const imageFiles: any = [];
+			const documentFiles: any = [];
+			for (const file of fileList) {
+				if (file && typeof file.type === 'string' && file.type.startsWith('image/')) {
+					imageFiles.push(file);
 				}
-				return;
+				else {
+					documentFiles.push(file);
+				}
 			}
-			imageUploadInput.click();
-		});
-		imageUploadInput.addEventListener('change', async (event?: any) => {
-			if (!isImageUploadEnabled(getSelectedModelValue())) {
-				imageUploadInput.value = '';
-				return;
+			const selectedModel: any = getSelectedModelValue();
+			if (imageFiles.length > 0) {
+				if (!isImageUploadEnabled(selectedModel)) {
+					if (String(selectedModel || '').trim() === 'deepseek') {
+						showEdaToastMessage(window, 'DeepSeek 不支持图片上传。', messageType.error);
+					}
+				}
+				else {
+					await addPendingImages(imageFiles, 'file');
+				}
 			}
-			const target: any = event.target;
-			const fileList: any = target && target.files ? Array.from(target.files) : [];
-			await addPendingImages(fileList, 'file');
-			imageUploadInput.value = '';
+			if (documentFiles.length > 0) {
+				await addPendingDocuments(documentFiles);
+			}
+			fileUploadInput.value = '';
 		});
 	}
-	if (documentUploadButton && documentUploadInput) {
-		documentUploadButton.addEventListener('click', () => {
-			documentUploadInput.click();
-		});
-		documentUploadInput.addEventListener('change', async (event?: any) => {
-			const target: any = event.target;
-			const fileList: any = target && target.files ? Array.from(target.files) : [];
-			await addPendingDocuments(fileList);
-			documentUploadInput.value = '';
-		});
+	function doSwitchSession(sessionId: string) {
+		if (!sessionId) {
+			return;
+		}
+		isRestoringSession = sessionManager.switchActiveChatSession(sessionId);
+		clearTodoPanel();
+		hasCompletedRound = false;
+		clearPendingImageEntries();
+		clearPendingDocumentEntries();
+		writeChatInputText('');
+		adjustChatInputHeight();
+		renderChatSessionList();
+		if (!isRestoringSession) {
+			syncChatEmptyStateVisibility();
+			updateSendButtonState();
+		}
 	}
-	if (chatSessionAddButton) {
-		chatSessionAddButton.addEventListener('click', () => {
+	function doDeleteSession(sessionId: string) {
+		if (!sessionId || isSending || isRestoringSession) {
+			return;
+		}
+		const activeSessionId: any = sessionManager.getActiveChatSessionId();
+		if (String(sessionId) !== String(activeSessionId)) {
+			sessionManager.switchActiveChatSession(sessionId);
+		}
+		isRestoringSession = sessionManager.deleteActiveChatSession();
+		clearTodoPanel();
+		hasCompletedRound = false;
+		clearPendingImageEntries();
+		clearPendingDocumentEntries();
+		writeChatInputText('');
+		adjustChatInputHeight();
+		renderChatSessionList();
+		if (!isRestoringSession) {
+			syncChatEmptyStateVisibility();
+			updateSendButtonState();
+		}
+	}
+	if (chatSidebarNewButton) {
+		chatSidebarNewButton.addEventListener('click', () => {
 			if (isSending || isRestoringSession) {
 				return;
 			}
@@ -2980,7 +2993,7 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 			clearPendingDocumentEntries();
 			writeChatInputText('');
 			adjustChatInputHeight();
-			renderChatSessionDropdownOptions();
+			renderChatSessionList();
 			syncChatEmptyStateVisibility();
 			updateSendButtonState();
 			if (chatEditor) {
@@ -2988,70 +3001,43 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 			}
 		});
 	}
-	if (chatSessionDeleteButton) {
-		chatSessionDeleteButton.addEventListener('click', () => {
-			if (isSending || isRestoringSession || !sessionManager.hasAnyChatSession() || !sessionManager.getActiveChatSessionId()) {
-				return;
-			}
-			isRestoringSession = sessionManager.deleteActiveChatSession();
-			clearTodoPanel();
-			hasCompletedRound = false;
-			clearPendingImageEntries();
-			clearPendingDocumentEntries();
-			writeChatInputText('');
-			adjustChatInputHeight();
-			renderChatSessionDropdownOptions();
-			if (!isRestoringSession) {
-				syncChatEmptyStateVisibility();
-				updateSendButtonState();
-			}
-			if (chatEditor) {
-				chatEditor.focus();
-			}
+	if (chatSidebarToggle) {
+		chatSidebarToggle.addEventListener('click', () => {
+			setChatSidebarCollapsed(!chatSidebarCollapsed);
 		});
 	}
-	if (chatSessionDropdownMenu) {
-		chatSessionDropdownMenu.addEventListener('click', (event?: any) => {
+	if (chatSidebarExpand) {
+		chatSidebarExpand.addEventListener('click', () => {
+			setChatSidebarCollapsed(false);
+		});
+	}
+	if (chatSidebarList) {
+		chatSidebarList.addEventListener('click', (event?: any) => {
 			const targetNode: any = event && event.target ? event.target : null;
+			const deleteButton: any = targetNode && targetNode.closest ? targetNode.closest('[data-action="delete-session"]') : null;
+			if (deleteButton) {
+				event.preventDefault();
+				event.stopPropagation();
+				const optionElement: any = deleteButton.closest('.chat-sesson-option');
+				const sessionId: any = String(optionElement && optionElement.getAttribute('data-session-id') || '').trim();
+				doDeleteSession(sessionId);
+				return;
+			}
 			const optionElement: any = targetNode && targetNode.closest ? targetNode.closest('.chat-sesson-option') : null;
-			if (!optionElement || !chatSessionDropdownMenu.contains(optionElement)) {
+			if (!optionElement || !chatSidebarList.contains(optionElement)) {
 				return;
 			}
 			event.preventDefault();
 			if (isSending || isRestoringSession) {
-				closeChatSessionDropdown();
 				return;
 			}
 			const sessionId: any = String(optionElement.getAttribute('data-session-id') || '').trim();
 			if (!sessionId) {
-				closeChatSessionDropdown();
 				return;
 			}
-			isRestoringSession = sessionManager.switchActiveChatSession(sessionId);
-			clearTodoPanel();
-			hasCompletedRound = false;
-			clearPendingImageEntries();
-			clearPendingDocumentEntries();
-			writeChatInputText('');
-			adjustChatInputHeight();
-			renderChatSessionDropdownOptions();
-			if (!isRestoringSession) {
-				syncChatEmptyStateVisibility();
-				updateSendButtonState();
-			}
-			closeChatSessionDropdown();
+			doSwitchSession(sessionId);
 		});
 	}
-	document.addEventListener('click', (event?: any) => {
-		if (!chatSessionDropdown) {
-			return;
-		}
-		const targetNode: any = event && event.target ? event.target : null;
-		if (targetNode && chatSessionDropdown.contains(targetNode)) {
-			return;
-		}
-		closeChatSessionDropdown();
-	});
 	document.addEventListener('paste', async (event?: any) => {
 		const clipboardData: any = event.clipboardData;
 		if (!clipboardData) {
@@ -3136,7 +3122,7 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 	});
 	setupThemeSync(applyTheme);
 	isRestoringSession = sessionManager.restoreChatSessionFromStorage();
-	renderChatSessionDropdownOptions();
+	renderChatSessionList();
 	if (!isRestoringSession) {
 		if (chatHistoryMessageContainer) {
 			chatHistoryMessageContainer.innerHTML = '';

@@ -1,9 +1,8 @@
 import { OverlayScrollbars } from 'overlayscrollbars';
-import { persistAgentSystemInstructions, readAgentSystemInstructions } from './llm/agent/instructions';
 import { closeIFramePageById } from './page/render';
 import { applyTheme, setupThemeSync } from './page/theme';
 import { readInitialPlatformId, readPlatformConfigs } from './platform/platform';
-import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
+import { hidePageLoadingMask } from './utils';
 
 (function () {
 	const STORAGE_KEY: any = 'jlc-eda-agent-ai-model-config';
@@ -14,13 +13,6 @@ import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
 	const platformConfigBlock: any = document.querySelector('.platform-config-block');
 	const leftMenu: any = document.querySelector('.left-menu');
 	const notes: any = document.getElementById('notes');
-	const instructionsEditor: any = document.getElementById('instructionsEditor');
-	const instructionsTextareaScroll: any = document.querySelector('.instructions-textarea-scroll');
-	const instructionsExportBtn: any = document.getElementById('instructionsExportBtn');
-	const instructionsImportBtn: any = document.getElementById('instructionsImportBtn');
-	const instructionsImportInput: any = document.getElementById('instructionsImportInput');
-	const instructionsSaveBtn: any = document.getElementById('instructionsSaveBtn');
-	const instructionsCancelBtn: any = document.getElementById('instructionsCancelBtn');
 	const verifyBtn: any = document.getElementById('verifyBtn');
 	const saveBtn: any = document.getElementById('saveBtn');
 	const closeBtn: any = document.getElementById('closeBtn');
@@ -29,22 +21,12 @@ import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
 	const modelInputMap: any = {};
 	const endpointInputMap: any = {};
 	const MENU_MODEL_CONFIG: any = 'model-config';
-	const MENU_INSTRUCTIONS: any = 'instructions-config';
 	const VERIFY_TIMEOUT_MS: any = 15000;
 	const SCROLLBAR_AUTO_HIDE_DELAY: any = 1000;
 	const OVERLAY_SCROLLBAR_THEME_CLASS: any = 'os-theme-jlceda';
-	const INSTRUCTIONS_IMPORT_MAX_FILE_SIZE: any = 1024 * 1024;
 	const overlayScrollbarInstanceMap: any = new WeakMap();
 	let hasPassedVerification: any = false;
 	let activeMenuName: any = MENU_MODEL_CONFIG;
-	// 生成指令本地备份文件名，格式：自定义指令_YYYYMMDD_HHMMSS.txt。
-	function buildInstructionsBackupFileName() {
-		const now: any = new Date();
-		const formatNumber: any = (value: any) => String(value).padStart(2, '0');
-		const datePart: any = now.getFullYear() + formatNumber(now.getMonth() + 1) + formatNumber(now.getDate());
-		const timePart: any = formatNumber(now.getHours()) + formatNumber(now.getMinutes()) + formatNumber(now.getSeconds());
-		return `自定义指令_${datePart}_${timePart}.txt`;
-	}
 	// 规范化滚动条自动隐藏模式。
 	function normalizeScrollbarAutoHideMode(value?: any) {
 		const modeText: any = String(value || '').trim();
@@ -91,10 +73,6 @@ import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
 					allowHorizontalScroll: false,
 					autoHideMode: 'leave',
 				}),
-				ensureOverlayScrollbarInstance(instructionsTextareaScroll, {
-					allowHorizontalScroll: false,
-					autoHideMode: 'move',
-				}),
 			];
 			for (let index: any = 0; index < overlayInstances.length; index += 1) {
 				const overlayInstance: any = overlayInstances[index];
@@ -104,74 +82,6 @@ import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
 				overlayInstance.update(true);
 			}
 		});
-	}
-	// 获取指令滚动视口节点，优先使用 OverlayScrollbars 视口。
-	function getInstructionsScrollViewport() {
-		if (!instructionsTextareaScroll) {
-			return null;
-		}
-		const overlayInstance: any = overlayScrollbarInstanceMap.get(instructionsTextareaScroll);
-		if (overlayInstance && typeof overlayInstance.elements === 'function') {
-			const overlayElements: any = overlayInstance.elements();
-			if (overlayElements && overlayElements.viewport) {
-				return overlayElements.viewport;
-			}
-		}
-		return instructionsTextareaScroll;
-	}
-	// 将指令滚动视口滚动到底部。
-	function scrollInstructionsViewportToBottom() {
-		const viewport: any = getInstructionsScrollViewport();
-		if (!viewport) {
-			return;
-		}
-		viewport.scrollTop = viewport.scrollHeight;
-	}
-	// 将指令滚动视口滚动到顶部。
-	function scrollInstructionsViewportToTop() {
-		const viewport: any = getInstructionsScrollViewport();
-		if (!viewport) {
-			return;
-		}
-		viewport.scrollTop = 0;
-	}
-	// 输入后执行两帧贴底滚动，避免换行时出现底部差一小段的问题。
-	function scheduleInstructionsViewportStickToBottom() {
-		window.requestAnimationFrame(() => {
-			scrollInstructionsViewportToBottom();
-			window.requestAnimationFrame(() => {
-				scrollInstructionsViewportToBottom();
-			});
-		});
-	}
-	// 默认加载指令时回到顶部，避免自动滚到底。
-	function scheduleInstructionsViewportResetToTop() {
-		window.requestAnimationFrame(() => {
-			scrollInstructionsViewportToTop();
-			window.requestAnimationFrame(() => {
-				scrollInstructionsViewportToTop();
-			});
-		});
-	}
-	// 判断指令编辑器光标是否位于文本末尾。
-	function isInstructionsSelectionAtEnd() {
-		if (!instructionsEditor) {
-			return false;
-		}
-		const selection: any = window.getSelection();
-		if (!selection || selection.rangeCount === 0) {
-			return false;
-		}
-		const range: any = selection.getRangeAt(0);
-		if (!range || !instructionsEditor.contains(range.endContainer)) {
-			return false;
-		}
-		const textBeforeCaretRange: any = range.cloneRange();
-		textBeforeCaretRange.selectNodeContents(instructionsEditor);
-		textBeforeCaretRange.setEnd(range.endContainer, range.endOffset);
-		const caretOffset: any = textBeforeCaretRange.toString().length;
-		const totalLength: any = String(instructionsEditor.textContent || '').length;
-		return caretOffset >= totalLength;
 	}
 	// 渲染平台页签与表单区域。
 	function renderPlatformUi() {
@@ -196,17 +106,17 @@ import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
 			panelNode.hidden = index !== 0;
 			const topSectionHtml: any = platformItem.isCustomEndpoint
 				? [
-						'<div class="field">',
-						'<label class="label">终结点（Endpoint）</label>',
-						`<input id="${platformItem.endpointField}" class="input" type="text" placeholder="https://api.example.com/v1/chat/completions" />`,
-						'</div>',
-					].join('')
+					'<div class="field">',
+					'<label class="label">终结点（Endpoint）</label>',
+					`<input id="${platformItem.endpointField}" class="input" type="text" placeholder="https://api.example.com/v1/chat/completions" />`,
+					'</div>',
+				].join('')
 				: [
-						'<div class="platform-entry">',
-						'<label class="label">平台入口</label>',
-						`<a class="platform-entry-link" href="${platformItem.entryUrl}" target="_blank" rel="noopener noreferrer">${platformItem.entryUrl}</a>`,
-						'</div>',
-					].join('');
+					'<div class="platform-entry">',
+					'<label class="label">平台入口</label>',
+					`<a class="platform-entry-link" href="${platformItem.entryUrl}" target="_blank" rel="noopener noreferrer">${platformItem.entryUrl}</a>`,
+					'</div>',
+				].join('');
 			const modelHintHtml: any = platformItem.modelHint
 				? `<div class="model-hint" role="note">${platformItem.modelHint}</div>`
 				: '';
@@ -310,118 +220,6 @@ import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
 	function setNotes(message?: any, type?: any, options?: any) {
 		setNotesUi(notes, message, type, options);
 	}
-	// 规范化指令文本，统一换行格式。
-	function normalizeInstructionsText(value?: any) {
-		return String(value || '').replace(/\r\n/g, '\n');
-	}
-	// 读取指令编辑器纯文本内容。
-	function readInstructionsEditorText() {
-		if (!instructionsEditor) {
-			return '';
-		}
-		return normalizeInstructionsText(instructionsEditor.textContent || '');
-	}
-	// 写入指令编辑器纯文本内容。
-	function writeInstructionsEditorText(value?: any) {
-		if (!instructionsEditor) {
-			return;
-		}
-		instructionsEditor.textContent = normalizeInstructionsText(value);
-	}
-	// 加载本地指令到输入框。
-	function loadInstructionsToForm() {
-		if (!instructionsEditor) {
-			return;
-		}
-		const instructionsResult: any = readAgentSystemInstructions();
-		writeInstructionsEditorText(instructionsResult.customInstructions);
-		refreshConfigOverlayScrollbars();
-		scheduleInstructionsViewportResetToTop();
-	}
-	// 保存指令输入框内容到本地。
-	function saveInstructions() {
-		if (!instructionsEditor) {
-			return;
-		}
-		const instructionsValue: any = readInstructionsEditorText();
-		const saved: any = persistAgentSystemInstructions(instructionsValue);
-		if (saved) {
-			showEdaToastMessage(window, '自定义指令修改成功。', messageType.info);
-			return;
-		}
-		showEdaToastMessage(window, '自定义指令修改失败。', messageType.error);
-	}
-	// 将指令文本导出到本地文件，便于手动备份。
-	function exportInstructionsToLocalFile() {
-		if (!instructionsEditor || !document.body) {
-			showEdaToastMessage(window, '保存失败：指令编辑器未就绪。', messageType.error);
-			return;
-		}
-		try {
-			const instructionsValue: any = readInstructionsEditorText();
-			const fileBlob: any = new Blob([instructionsValue], {
-				type: 'text/plain;charset=utf-8',
-			});
-			const objectUrl: any = URL.createObjectURL(fileBlob);
-			const linkNode: any = document.createElement('a');
-			linkNode.href = objectUrl;
-			linkNode.download = buildInstructionsBackupFileName();
-			linkNode.style.display = 'none';
-			document.body.appendChild(linkNode);
-			linkNode.click();
-			window.setTimeout(() => {
-				URL.revokeObjectURL(objectUrl);
-				if (linkNode.parentNode) {
-					linkNode.parentNode.removeChild(linkNode);
-				}
-			}, 0);
-		}
-		catch {
-			showEdaToastMessage(window, '保存失败：无法写入本地文件。', messageType.error);
-		}
-	}
-	// 读取本地文件文本内容，导入到指令编辑器。
-	function readInstructionsTextFromFile(fileNode?: any) {
-		return new Promise((resolve?: any, reject?: any) => {
-			if (!fileNode) {
-				reject(new Error('未选择文件。'));
-				return;
-			}
-			const reader: any = new FileReader();
-			reader.onload = () => {
-				resolve(normalizeInstructionsText(reader.result || ''));
-			};
-			reader.onerror = () => {
-				reject(new Error('读取本地文件失败。'));
-			};
-			reader.readAsText(fileNode, 'utf-8');
-		});
-	}
-	// 从本地选择文件并写入指令编辑器，导入后由用户点击“修改”进行持久化。
-	async function importInstructionsFromLocalFile(fileInputNode?: any) {
-		if (!instructionsEditor || !fileInputNode || !fileInputNode.files || fileInputNode.files.length === 0) {
-			return;
-		}
-		const fileNode: any = fileInputNode.files[0];
-		if (Number(fileNode.size || 0) > INSTRUCTIONS_IMPORT_MAX_FILE_SIZE) {
-			showEdaToastMessage(window, '导入失败：文件过大，请控制在 1MB 内。', messageType.error);
-			fileInputNode.value = '';
-			return;
-		}
-		try {
-			const importedText: any = await readInstructionsTextFromFile(fileNode);
-			writeInstructionsEditorText(importedText);
-			refreshConfigOverlayScrollbars();
-			scheduleInstructionsViewportResetToTop();
-			showEdaToastMessage(window, '本地指令已载入，请点击“修改”保存。', messageType.info);
-		}
-		catch {
-			showEdaToastMessage(window, '导入失败：读取本地文件失败。', messageType.error);
-		}
-		finally {
-			fileInputNode.value = '';
-		}
-	}
 	// 切换左侧菜单对应内容区。
 	function switchMainMenu(menuName?: any) {
 		const targetMenuName: any = String(menuName || '').trim() || MENU_MODEL_CONFIG;
@@ -444,9 +242,6 @@ import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
 			const isActive: any = String(panelNode.getAttribute('data-menu-panel') || '') === targetMenuName;
 			panelNode.hidden = !isActive;
 			panelNode.classList.toggle('is-active', isActive);
-		}
-		if (targetMenuName === MENU_INSTRUCTIONS) {
-			loadInstructionsToForm();
 		}
 		refreshConfigOverlayScrollbars();
 	}
@@ -812,40 +607,6 @@ import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
 					return;
 				}
 				switchMainMenu(menuName);
-			});
-		}
-		if (instructionsSaveBtn) {
-			instructionsSaveBtn.addEventListener('click', () => {
-				saveInstructions();
-			});
-		}
-		if (instructionsExportBtn) {
-			instructionsExportBtn.addEventListener('click', () => {
-				exportInstructionsToLocalFile();
-			});
-		}
-		if (instructionsImportBtn && instructionsImportInput) {
-			instructionsImportBtn.addEventListener('click', () => {
-				instructionsImportInput.click();
-			});
-			instructionsImportInput.addEventListener('change', () => {
-				importInstructionsFromLocalFile(instructionsImportInput);
-			});
-		}
-		if (instructionsEditor) {
-			instructionsEditor.addEventListener('input', (event?: any) => {
-				const inputTypeText: any = event && event.inputType ? String(event.inputType) : '';
-				const isLineBreakInput: any = inputTypeText === 'insertParagraph' || inputTypeText === 'insertLineBreak';
-				const shouldStickToBottom: any = isLineBreakInput || isInstructionsSelectionAtEnd();
-				refreshConfigOverlayScrollbars();
-				if (shouldStickToBottom) {
-					scheduleInstructionsViewportStickToBottom();
-				}
-			});
-		}
-		if (instructionsCancelBtn) {
-			instructionsCancelBtn.addEventListener('click', () => {
-				closeIFramePageById(IFRAME_ID);
 			});
 		}
 		verifyBtn.addEventListener('click', () => {

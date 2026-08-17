@@ -200,5 +200,67 @@
 				"required": ["components"]
 			}
 		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "component_modify",
+			"description": "修改当前原理图页面中指定器件的属性参数（位号、阻值/容值、封装、制造商等）。",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"designator": {
+						"type": "string",
+						"description": "目标器件位号（必填），例如 \"R1\"/\"C2\"。"
+					},
+					"newDesignator": {
+						"type": "string",
+						"description": "修改后的新位号（可选）。"
+					},
+					"value": {
+						"type": "string",
+						"description": "器件参数值（可选），例如电阻 \"4.7kΩ\"、电容 \"100nF\"。"
+					},
+					"footprint": {
+						"type": "string",
+						"description": "封装名称（可选），例如 \"0603\"/\"SOT-23-3\"。"
+					},
+					"manufacturer": {
+						"type": "string",
+						"description": "制造商名称（可选）。"
+					},
+					"supplier": {
+						"type": "string",
+						"description": "供应商名称（可选）。"
+					},
+					"otherProperties": {
+						"type": "object",
+						"description": "其它需要修改的属性键值对（可选），值类型为 string/number/boolean。"
+					}
+				},
+				"required": ["designator"]
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "component_delete",
+			"description": "删除当前原理图页面中指定位号的器件，执行前会弹出确认面板等待用户确认。",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"designator": {
+						"type": "string",
+						"description": "待删除器件位号（必填），例如 \"R1\"。"
+					},
+					"reason": {
+						"type": "string",
+						"description": "删除原因（可选），用于在确认面板展示给用户。"
+					}
+				},
+				"required": ["designator"]
+			}
+		}
 	}
 ]

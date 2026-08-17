@@ -3,6 +3,8 @@ import { makeJsonSafe } from '../utils';
 import { createApiIndexHandler } from './api-index';
 import { createApiInvokeHandler } from './api-invoke';
 import { createApiSearchHandler } from './api-search';
+import { createComponentDeleteHandler } from './component-delete';
+import { createComponentModifyHandler } from './component-modify';
 import { createComponentPlaceHandler } from './component-place';
 import { createComponentSelectHandler } from './component-select';
 import { createEdaContextHandler } from './eda-context';
@@ -22,6 +24,8 @@ export const MANUAL_EXPOSED_TOOL_NAMES: string[] = [
 	'todo_list',
 	'component_select',
 	'component_place',
+	'component_modify',
+	'component_delete',
 ];
 
 // 当前会话中有效的 blob URL 集合，页面关闭后自动失效，不会持久化。
@@ -194,6 +198,12 @@ function buildExpectedArgumentsFormat(toolName: string): string {
 	if (toolName === 'component_place') {
 		return '{"components":[{"uuid":"器件UUID","libraryUuid":"库UUID","name":"器件名称","footprintName":"封装名称","subPartName":""}],"timeoutSeconds":60}';
 	}
+	if (toolName === 'component_modify') {
+		return '{"designator":"R1","value":"4.7kΩ","footprint":"0603"}';
+	}
+	if (toolName === 'component_delete') {
+		return '{"designator":"R1","reason":"冗余器件"}';
+	}
 	return '{"参数1":"值1","参数2":"值2"}';
 }
 
@@ -352,6 +362,20 @@ export async function executeTool(toolRuntime?: any, toolName?: any, rawArgument
 			}
 			return await runtimeObject.handleComponentPlaceTask(handlerArgs);
 		},
+		// 工具：component_modify；功能：修改当前页指定器件的属性参数。
+		async component_modify(handlerArgs?: unknown): Promise<unknown> {
+			if (typeof runtimeObject.handleComponentModifyTask !== 'function') {
+				return { ok: false, error: 'component_modify 处理器未初始化。' };
+			}
+			return await runtimeObject.handleComponentModifyTask(handlerArgs);
+		},
+		// 工具：component_delete；功能：定位器件并返回删除确认协议，由用户确认后执行删除。
+		async component_delete(handlerArgs?: unknown): Promise<unknown> {
+			if (typeof runtimeObject.handleComponentDeleteTask !== 'function') {
+				return { ok: false, error: 'component_delete 处理器未初始化。' };
+			}
+			return await runtimeObject.handleComponentDeleteTask(handlerArgs);
+		},
 	};
 
 	const handler: any = MANUAL_EXPOSED_TOOL_NAMES.includes(normalizedToolName)
@@ -421,6 +445,8 @@ export function createAgentToolRuntime(runtimeWindow?: any) {
 	const { handleTodoListTask } = createTodoListHandler();
 	const { handleComponentSelectTask } = createComponentSelectHandler(runtimeWindow || window);
 	const { handleComponentPlaceTask } = createComponentPlaceHandler();
+	const { handleComponentModifyTask } = createComponentModifyHandler(runtimeWindow || window);
+	const { handleComponentDeleteTask } = createComponentDeleteHandler(runtimeWindow || window);
 
 	return {
 		resolveApiMemberInAnyRoot,
@@ -491,6 +517,22 @@ export function createAgentToolRuntime(runtimeWindow?: any) {
 		handleComponentPlaceTask: async (payload?: unknown) => {
 			try {
 				return await handleComponentPlaceTask(payload);
+			}
+			catch (error: unknown) {
+				return { ok: false, error: toSafeErrorMessage(error) };
+			}
+		},
+		handleComponentModifyTask: async (payload?: unknown) => {
+			try {
+				return await handleComponentModifyTask(payload);
+			}
+			catch (error: unknown) {
+				return { ok: false, error: toSafeErrorMessage(error) };
+			}
+		},
+		handleComponentDeleteTask: async (payload?: unknown) => {
+			try {
+				return await handleComponentDeleteTask(payload);
 			}
 			catch (error: unknown) {
 				return { ok: false, error: toSafeErrorMessage(error) };
