@@ -1,4 +1,4 @@
-﻿import type { ChatVListEngine, ChatVListStore } from './chat-vlist';
+import type { ChatVListEngine, ChatVListStore } from './chat-vlist';
 import { OverlayScrollbars } from 'overlayscrollbars';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { createChatVListEngine, createChatVListStore } from './chat-vlist';
@@ -26,15 +26,15 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 (function () {
 	ensureSvgIconSpriteLoaded();
 	const STORAGE_KEY: any = CHAT_MODEL_CONFIG_CONSTANTS.storageKey;
-	const IFRAME_ID: any = 'jlceda-design-copilot-chat-tool';
+	const IFRAME_ID: any = 'jlc-eda-agent-chat-tool';
 	const MODEL_SELECT_PLACEHOLDER_TEXT: any = CHAT_MODEL_CONFIG_CONSTANTS.modelSelectPlaceholderText;
 	const MODEL_SELECTION_KEY: any = CHAT_MODEL_CONFIG_CONSTANTS.modelSelectionKey;
 	const IMAGE_ATTACHMENT_LIMIT: any = CHAT_MODEL_CONFIG_CONSTANTS.imageAttachmentLimit;
 	const MODEL_CONFIG_MAP: any = CHAT_MODEL_CONFIG_CONSTANTS.modelConfigMap;
-	const CHAT_SESSION_STORAGE_KEY: any = 'jlceda-design-copilot-chat-session-v2';
+	const CHAT_SESSION_STORAGE_KEY: any = 'jlc-eda-agent-chat-session-v2';
 	const CHAT_SESSION_MAX_MESSAGES: any = 120;
 	const CHAT_SESSION_DEFAULT_TITLE: any = '新对话';
-	const CHAT_EMPTY_STATE_TITLE_TEXT: any = 'AI 设计助手';
+	const CHAT_EMPTY_STATE_TITLE_TEXT: any = 'JLC EDA Agent';
 	const CHAT_EMPTY_STATE_NOTICE_TEXT: any = '我是个辅助工具，也可能会出错，请注意核对结果。';
 	const CHAT_EMPTY_STATE_EXAMPLES: any = [
 		'帮我检查一下这个原理图。',

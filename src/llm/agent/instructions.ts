@@ -1,7 +1,7 @@
 // 文件说明：封装智能体系统指令构建、自定义指令持久化与拼接逻辑。
 
 /** 自定义指令本地存储键。 */
-export const SYSTEM_INSTRUCTIONS_STORAGE_KEY: any = 'jlceda-design-copilot-system-instructions';
+export const SYSTEM_INSTRUCTIONS_STORAGE_KEY: any = 'jlc-eda-agent-system-instructions';
 
 /**
  * 系统指令读取结果。

@@ -1,0 +1,15 @@
+fix: 替换所有 storage key 和 iframe id 避免旧数据残留
+
+旧版本用的 key 是 jlceda-design-copilot-*，会和原项目共用 localStorage，导致：
+- 旧项目的聊天记录被新插件读取
+- 旧项目的模型配置覆盖新插件
+- 旧项目的自定义指令被沿用
+
+改为 jlc-eda-agent-* 前缀，隔离存储空间。
+
+涉及文件：
+- src/config.ts（STORAGE_KEY、IFRAME_ID）
+- src/chat.ts（IFRAME_ID、CHAT_SESSION_STORAGE_KEY、空状态标题）
+- src/index.ts（openIFrame 的 id 参数）
+- src/page/model.ts（CHAT_MODEL_CONFIG_CONSTANTS.storageKey 和 modelSelectionKey）
+- src/llm/agent/instructions.ts（SYSTEM_INSTRUCTIONS_STORAGE_KEY）

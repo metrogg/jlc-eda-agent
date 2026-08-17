@@ -4,9 +4,9 @@ import { readApiFormatMapByPlatform, readFixedEndpointMapByPlatform, readImagePa
  * 聊天页模型配置常量。
  */
 export const CHAT_MODEL_CONFIG_CONSTANTS: any = {
-	storageKey: 'jlceda-design-copilot-ai-model-config',
+	storageKey: 'jlc-eda-agent-ai-model-config',
 	modelSelectPlaceholderText: '请选择平台',
-	modelSelectionKey: 'jlceda-design-copilot-model-selection',
+	modelSelectionKey: 'jlc-eda-agent-model-selection',
 	imageAttachmentLimit: 5,
 	modelConfigMap: readModelConfigMapByPlatform(),
 	modelImagePayloadMode: readImagePayloadModeMapByPlatform(),

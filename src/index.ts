@@ -27,7 +27,7 @@ export function about(): void {
  * 打开聊天工具页面
  */
 export async function openChatTool(): Promise<void> {
-	await eda.sys_IFrame.openIFrame('/iframe/index.html', 550, 700, 'jlceda-design-copilot-chat-tool', {
+	await eda.sys_IFrame.openIFrame('/iframe/index.html', 550, 700, 'jlc-eda-agent-chat-tool', {
 		maximizeButton: false,
 		minimizeButton: true,
 	});
@@ -37,7 +37,7 @@ export async function openChatTool(): Promise<void> {
  * 打开 AI 模型配置页面
  */
 export async function openAiModelConfig(): Promise<void> {
-	await eda.sys_IFrame.openIFrame('/iframe/model-config.html', 800, 560, 'jlceda-design-copilot-ai-model-config', {
+	await eda.sys_IFrame.openIFrame('/iframe/model-config.html', 800, 560, 'jlc-eda-agent-ai-model-config', {
 		maximizeButton: false,
 		minimizeButton: true,
 	});

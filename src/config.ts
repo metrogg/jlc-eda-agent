@@ -6,8 +6,8 @@ import { readInitialPlatformId, readPlatformConfigs } from './platform/platform'
 import { hidePageLoadingMask, messageType, showEdaToastMessage } from './utils';
 
 (function () {
-	const STORAGE_KEY: any = 'jlceda-design-copilot-ai-model-config';
-	const IFRAME_ID: any = 'jlceda-design-copilot-ai-model-config';
+	const STORAGE_KEY: any = 'jlc-eda-agent-ai-model-config';
+	const IFRAME_ID: any = 'jlc-eda-agent-ai-model-config';
 	const PLATFORM_LIST: any = readPlatformConfigs();
 	const tabRow: any = document.querySelector('.tab-row');
 	const platformPanels: any = document.querySelector('.platform-panels');
