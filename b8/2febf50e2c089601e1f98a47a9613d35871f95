@@ -1,0 +1,42 @@
+src/chat.ts
+  s_5401a8966ba772::t_c5d37230c6fd23 2528-2530
+.commit-msg.tmp
+  s_5401a8966ba772::t_b98054968be1fa 1-5
+src/tools/schematic-read.ts
+  s_5401a8966ba772::t_2d449bde971157 189-190,196,209,221,228,264,270-279
+  s_5401a8966ba772::t_7a2206734c0fd4 121-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "b82febf50e2c089601e1f98a47a9613d35871f95",
+  "prompts": {},
+  "humans": {
+    "h_53ec80f8648b06": {
+      "author": "metrogg <146624525+metrogg@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_5401a8966ba772": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a7f2def9798ae252f9c1a0f",
+        "model": "kimi-k2.7-code"
+      },
+      "human_author": "metrogg <146624525+metrogg@users.noreply.github.com>",
+      "custom_attributes": {
+        "external_session_id": "6a7f2def9798ae252f9c1a0f",
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "tool_type": "builtin",
+        "source_scene": "agent",
+        "dedupe_key": "6a7f2def9798ae252f9c1a0f:6a82be809798ae252f9c33d0:afterEdit:4ab1f1ae",
+        "operation_id": "6a82be809798ae252f9c33d0",
+        "runtime_client": "trae-tob-git-ai",
+        "session_id": "6a7f2def9798ae252f9c1a0f",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "tool_use_id": "6a82be809798ae252f9c33d0"
+      }
+    }
+  }
+}
