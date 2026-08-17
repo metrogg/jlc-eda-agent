@@ -118,7 +118,8 @@ async function readSchematicCircuit(
 	safeCall: SchematicReadDeps['safeCall'],
 ): Promise<{ ok: true; data: string } | { ok: false; error: string }> {
 	// ── 第一步：获取所有器件实例 ──────────────────────────────────────────
-	const componentListRaw = await safeCall(() => root.sch_PrimitiveComponent.getAll(undefined, true));
+	// 仅读取当前激活页，避免多页工程时数据量过大导致超时。
+	const componentListRaw = await safeCall(() => root.sch_PrimitiveComponent.getAll(undefined, false));
 	if (!Array.isArray(componentListRaw)) {
 		return { ok: false, error: '器件列表获取失败，sch_PrimitiveComponent.getAll 未返回数组。' };
 	}
@@ -185,15 +186,14 @@ async function readSchematicCircuit(
 	// networkName → Set<pinRef>，pinRef 格式为 "designator.pinNumber"
 	const networkToPinRefSetMap: Map<string, Set<string>> = new Map();
 
-	const components: ComponentSemanticInfo[] = [];
-
-	for (const rawComponent of componentListRaw) {
+	// 并行获取所有器件引脚，避免多器件时顺序 await 导致超时。
+	const componentPromises = componentListRaw.map(async (rawComponent): Promise<ComponentSemanticInfo | null> => {
 		const componentDesignator = getSyncState<string>(rawComponent, 'getState_Designator', '');
 		const netFlagNetworkName = getSyncState<string>(rawComponent, 'getState_Net', '');
 
 		if (componentDesignator.length === 0 && netFlagNetworkName.length === 0) {
 			// 既无位号也无网络名，跳过无效图元。
-			continue;
+			return null;
 		}
 
 		if (netFlagNetworkName.length > 0) {
@@ -206,7 +206,7 @@ async function readSchematicCircuit(
 				networkToPinRefSetMap.set(netFlagNetworkName, networkPinSet);
 			}
 			networkPinSet.add(pinRef);
-			components.push({
+			return {
 				componentInstanceId: primitiveId,
 				componentDesignator: netFlagNetworkName,
 				componentSymbolName: netFlagNetworkName,
@@ -218,15 +218,14 @@ async function readSchematicCircuit(
 					connectedNetworkName: netFlagNetworkName,
 					hasNoConnectMark: false,
 				}],
-			});
-			continue;
+			};
 		}
 
 		// 普通器件：获取所有引脚并查找连接网络名。
 		const primitiveId = getSyncState<string>(rawComponent, 'getState_PrimitiveId', '');
 		const pinsRaw = await safeCall(() => root.sch_PrimitiveComponent.getAllPinsByPrimitiveId(primitiveId));
 		if (pinsRaw !== undefined && !Array.isArray(pinsRaw)) {
-			return { ok: false, error: `器件 ${componentDesignator} 的引脚列表格式异常。` };
+			throw new Error(`器件 ${componentDesignator} 的引脚列表格式异常。`);
 		}
 
 		const pins: PinSemanticInfo[] = [];
@@ -262,13 +261,22 @@ async function readSchematicCircuit(
 			});
 		}
 
-		components.push({
+		return {
 			componentInstanceId: primitiveId,
 			componentDesignator,
 			componentSymbolName: getSyncState<string>(rawComponent, 'getState_Name', ''),
 			schematicSubPartName: getSyncState<string>(rawComponent, 'getState_SubPartName', ''),
 			pins,
-		});
+		};
+	});
+
+	let components: ComponentSemanticInfo[];
+	try {
+		components = (await Promise.all(componentPromises)).filter((item): item is ComponentSemanticInfo => item !== null);
+	}
+	catch (error: unknown) {
+		const message = error instanceof Error ? error.message : String(error ?? '');
+		return { ok: false, error: message };
 	}
 
 	// ── 第四步：将 networkToPinRefSetMap 转为按网络名排序的数组 ────────────

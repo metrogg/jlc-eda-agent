@@ -1,0 +1,5 @@
+fix: 优化 schematic_read 读取性能并延长超时
+
+- 将 sch_PrimitiveComponent.getAll 的 allSchematicPages 从 true 改为 false，仅读取当前激活页，避免多页工程数据量过大
+- 把顺序获取器件引脚改为 Promise.all 并行获取，减少顺序 await 带来的耗时
+- chat.ts 对 schematic_read 单独使用 30 秒超时，其余工具保持 10 秒

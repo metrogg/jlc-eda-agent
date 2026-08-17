@@ -2525,7 +2525,9 @@ import { hidePageLoadingMask, messageType, safeJsonStringify, showEdaToastMessag
 						const displayToolCall: any = toolCall;
 						setFoldLoadingState(toolMessageDomNode, true);
 						try {
-							result = await executeToolWithTimeout(toolRuntime, toolName, toolArgs, TOOL_CALL_TIMEOUT_SECONDS);
+							// 原理图读取涉及大量 EDA API 调用，给予更长超时时间。
+							const effectiveTimeoutSeconds = toolName === 'schematic_read' ? 30 : TOOL_CALL_TIMEOUT_SECONDS;
+							result = await executeToolWithTimeout(toolRuntime, toolName, toolArgs, effectiveTimeoutSeconds);
 						}
 						finally {
 							setFoldLoadingState(toolMessageDomNode, false);
