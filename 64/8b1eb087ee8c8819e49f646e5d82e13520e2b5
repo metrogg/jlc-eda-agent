@@ -1,0 +1,37 @@
+docs/demo.md
+  s_5401a8966ba772::t_b9dd73fa398823 1-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "648b1eb087ee8c8819e49f646e5d82e13520e2b5",
+  "prompts": {},
+  "humans": {
+    "h_53ec80f8648b06": {
+      "author": "metrogg <146624525+metrogg@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_5401a8966ba772": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a7f2def9798ae252f9c1a0f",
+        "model": "kimi-k2.7-code"
+      },
+      "human_author": "metrogg <146624525+metrogg@users.noreply.github.com>",
+      "custom_attributes": {
+        "tool_use_id": "6a82bb8b9798ae252f9c3363",
+        "external_session_id": "6a7f2def9798ae252f9c1a0f",
+        "source_scene": "agent",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "runtime_client": "trae-tob-git-ai",
+        "dedupe_key": "6a7f2def9798ae252f9c1a0f:6a82bb8b9798ae252f9c3363:afterEdit:4ab1f1ae",
+        "session_id": "6a7f2def9798ae252f9c1a0f",
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "tool_type": "builtin",
+        "operation_id": "6a82bb8b9798ae252f9c3363"
+      }
+    }
+  }
+}
