@@ -38,7 +38,7 @@ LLM 适配层（OpenAI / Anthropic / DeepSeek）
     ↓
 工具执行层（超时保护 + 路由 + 白名单）
     ↓
-工具实现层（9 个工具）
+工具实现层（读写工具集）
     ↓
 EDA API 层（eda.* 命名空间）
 ```
@@ -48,14 +48,14 @@ EDA API 层（eda.* 命名空间）
 | 工具 | 功能 | 交互 |
 |------|------|------|
 | `schematic_read` | 读取当前页原理图 | 否 |
-| `schematic_review` | 读取全工程网表 | 否 |
-| `component_search` | 搜索立创商城器件 | 是（选型面板） |
-| `component_place` | 自动放置器件到坐标 | 否 |
-| `component_modify` | 修改器件属性 | 否 |
-| `component_delete` | 删除器件 | 否 |
-| `wire_create` | 创建导线 | 否 |
-| `net_flag_create` | 创建网络标识 | 否 |
+| `schematic_review` | 读取全工程网表 + DRC | 否 |
+| `component_select` | 搜索立创商城器件 | 是（选型面板） |
+| `component_place` | 引导交互放置器件 | 是（放置确认） |
+| `component_modify` | 修改器件属性（阻值、封装、位号等） | 否 |
+| `component_delete` | 删除器件 | 是（删除确认面板） |
 | `todo_list` | 任务管理 | 否 |
+
+> 注：`wire_create` / `net_flag_create` 等自动连线能力正在规划中。
 
 ## 开始使用
 
@@ -64,6 +64,30 @@ EDA API 层（eda.* 命名空间）
 3. 选择平台，填写 `API Key` 和 `Model`。
 4. 点击 `验证配置`，通过后点击 `保存`。
 5. 选择 `聊天`，开始使用。
+
+## 演示示例
+
+安装配置完成后，在聊天窗口输入以下任意指令即可体验：
+
+```text
+帮我解读当前这一页原理图
+```
+
+```text
+审查一下这个设计有没有问题
+```
+
+```text
+把 R1 从 10k 改成 4.7k
+```
+
+```text
+R3 是冗余器件，把它删掉
+```
+
+```text
+帮我找一个 10uF/0603 的陶瓷电容并放到图里
+```
 
 ## 支持的模型平台
 
