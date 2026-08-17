@@ -1,0 +1,103 @@
+{
+	"name": "jlc-eda-agent",
+	"uuid": "611aa935b99d4423a2d34c0bfaeff64f",
+	"displayName": "JLC EDA Agent",
+	"description": "AI 电路读图与优化助手 - 让 AI 帮你读懂、审查、优化原理图设计。",
+	"version": "0.1.0",
+	"publisher": "metrogg",
+	"engines": {
+		"eda": "^3.0.0"
+	},
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "extension-store",
+		"url": ""
+	},
+	"categories": "Project",
+	"keywords": [
+		"EDA",
+		"AI",
+		"Agent",
+		"Schematic",
+		"JLCEDA"
+	],
+	"images": {
+		"logo": "./images/logo.png"
+	},
+	"homepage": "https://github.com/metrogg/jlc-eda-agent",
+	"bugs": "https://github.com/metrogg/jlc-eda-agent/issues",
+	"activationEvents": {},
+	"entry": "./dist/index",
+	"dependentExtensions": {},
+	"headerMenus": {
+		"home": [
+			{
+				"id": "jlc-eda-agent",
+				"title": "JLC EDA Agent",
+				"menuItems": [
+					{
+						"id": "ChatTool",
+						"title": "聊天",
+						"registerFn": "openChatTool"
+					},
+					{
+						"id": "AIModelConfig",
+						"title": "设置",
+						"registerFn": "openAiModelConfig"
+					},
+					{
+						"id": "About",
+						"title": "About...",
+						"registerFn": "about"
+					}
+				]
+			}
+		],
+		"sch": [
+			{
+				"id": "jlc-eda-agent",
+				"title": "JLC EDA Agent",
+				"menuItems": [
+					{
+						"id": "ChatTool",
+						"title": "聊天",
+						"registerFn": "openChatTool"
+					},
+					{
+						"id": "AIModelConfig",
+						"title": "设置",
+						"registerFn": "openAiModelConfig"
+					},
+					{
+						"id": "About",
+						"title": "About...",
+						"registerFn": "about"
+					}
+				]
+			}
+		],
+		"pcb": [
+			{
+				"id": "jlc-eda-agent",
+				"title": "JLC EDA Agent",
+				"menuItems": [
+					{
+						"id": "ChatTool",
+						"title": "聊天",
+						"registerFn": "openChatTool"
+					},
+					{
+						"id": "AIModelConfig",
+						"title": "设置",
+						"registerFn": "openAiModelConfig"
+					},
+					{
+						"id": "About",
+						"title": "About...",
+						"registerFn": "about"
+					}
+				]
+			}
+		]
+	}
+}

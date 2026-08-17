@@ -1,0 +1,5 @@
+{
+	"About": "About",
+	"EDA Design Copilot v": "JLC EDA Agent v${1}",
+	"EDA Design Copilot About Content": "JLC EDA Agent v${1}\nAI Schematic Reader & Optimizer\nAI agent that reads, reviews, and optimizes schematic designs.\nAuthor: metrogg"
+}

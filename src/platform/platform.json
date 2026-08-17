@@ -1,0 +1,75 @@
+{
+	"platforms": [
+		{
+			"id": "deepseek",
+			"label": "DeepSeek",
+			"entryUrl": "https://platform.deepseek.com/",
+			"endpoint": "https://api.deepseek.com/chat/completions",
+			"keyField": "deepseekKey",
+			"endpointField": "deepseekUrl",
+			"modelField": "deepseekModel",
+			"model": "deepseek-reasoner",
+			"imagePayloadMode": ""
+		},
+		{
+			"id": "ali",
+			"label": "阿里",
+			"entryUrl": "https://dashscope.console.aliyun.com/",
+			"endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+			"keyField": "aliKey",
+			"endpointField": "aliUrl",
+			"modelField": "aliModel",
+			"model": "qwen3.5-plus",
+			"imagePayloadMode": "image_url"
+		},
+		{
+			"id": "zhipu",
+			"label": "智谱",
+			"entryUrl": "https://open.bigmodel.cn/",
+			"endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+			"keyField": "zhipuKey",
+			"endpointField": "zhipuUrl",
+			"modelField": "zhipuModel",
+			"model": "GLM-4.6V",
+			"imagePayloadMode": "image_url"
+		},
+		{
+			"id": "minimax",
+			"label": "MiniMax",
+			"entryUrl": "https://platform.minimaxi.com/",
+			"endpoint": "https://api.minimaxi.com/v1/text/chatcompletion_v2",
+			"keyField": "minimaxKey",
+			"endpointField": "minimaxUrl",
+			"modelField": "minimaxModel",
+			"model": "MiniMax-M2.7",
+			"imagePayloadMode": "image_url"
+		},
+		{
+			"id": "custom-openai",
+			"label": "OpenAI 兼容",
+			"entryUrl": "",
+			"endpoint": "",
+			"keyField": "customOpenAIKey",
+			"endpointField": "customOpenAIUrl",
+			"modelField": "customOpenAIModel",
+			"model": "",
+			"imagePayloadMode": "image_url",
+			"isCustomEndpoint": true,
+			"modelHint": "此选项卡仅适用于 OpenAI 兼容格式（REST API）的模型，例如 gpt-5.4。请勿将 Anthropic 原生模型（如 claude-opus-4-6）填写在此处，否则请求将会失败。"
+		},
+		{
+			"id": "custom-anthropic",
+			"label": "Anthropic 兼容",
+			"entryUrl": "",
+			"endpoint": "",
+			"keyField": "customAnthropicKey",
+			"endpointField": "customAnthropicUrl",
+			"modelField": "customAnthropicModel",
+			"model": "",
+			"imagePayloadMode": "image_url",
+			"isCustomEndpoint": true,
+			"apiFormat": "anthropic",
+			"modelHint": "此选项卡仅适用于 Anthropic 原生格式的模型，例如 claude-opus-4-6 等。请勿将 OpenAI 兼容模型（如 gpt-5.4）填写在此处，否则请求将会失败。"
+		}
+	]
+}

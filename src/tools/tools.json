@@ -1,0 +1,204 @@
+[
+	{
+		"type": "function",
+		"function": {
+			"name": "api_index",
+			"description": "查询可调用 EDA API 索引。",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"owner": {
+						"type": "string",
+						"description": "命名空间过滤（可选），例如 sch/pcb/lib/dmt，不填则返回全部。"
+					}
+				}
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "api_search",
+			"description": "检索 EDA API 签名与说明。",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string",
+						"description": "检索关键词（必填），可输入 API 名称、摘要或命名空间关键词。"
+					},
+					"scope": {
+						"type": "string",
+						"enum": ["all", "callable", "type"],
+						"description": "检索范围（可选）：all=全部，callable=可调用 API，type=类型符号。默认 all。查找可调用函数时优先使用 callable。"
+					},
+					"owner": {
+						"type": "string",
+						"description": "命名空间过滤（可选），例如 lib/sch/pcb/dmt。"
+					},
+					"limit": {
+						"type": "number",
+						"description": "返回上限（可选），范围 1~50。"
+					}
+				},
+				"required": ["query"]
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "eda_context",
+			"description": "获取当前 EDA 运行时上下文。",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"scope": {
+						"type": "string",
+						"description": "上下文范围标识（可选），用于业务侧分组标记。"
+					}
+				}
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "api_invoke",
+			"description": "调用指定的 EDA API。",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"apiFullName": {
+						"type": "string",
+						"description": "完整 API 路径（必填），格式例如 eda.sch_Drc.check。"
+					},
+					"args": {
+						"type": "string",
+						"description": "参数数组的 JSON 字符串，将全部参数按顺序放入数组并序列化，例如 \"[false,false,true]\" 或 \"[{\\\"uuid\\\":\\\"abc\\\"},100,100]\"."
+					}
+				},
+				"required": ["apiFullName", "args"]
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "schematic_read",
+			"description": "读取当前原理图页面的完整电路语义快照。",
+			"parameters": {
+				"type": "object",
+				"properties": {}
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "schematic_review",
+			"description": "读取全工程所有原理图页面的网表文件。",
+			"parameters": {
+				"type": "object",
+				"properties": {}
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "todo_list",
+			"description": "更新任务面板中的结构化待办列表。",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"todoList": {
+						"type": "array",
+						"description": "任务列表数组，每项必须包含 id、title、status 三个字段。status 仅允许 not-started、in-progress、completed 三个值。",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": { "type": "number", "description": "任务 ID，正整数。" },
+								"title": { "type": "string", "description": "任务标题。" },
+								"status": { "type": "string", "description": "任务状态：not-started、in-progress、completed。" }
+							},
+							"required": ["id", "title", "status"]
+						}
+					},
+					"explanation": {
+						"type": "string",
+						"description": "可选说明文本。"
+					}
+				},
+				"required": ["todoList"]
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "component_select",
+			"description": "搜索候选器件并等待用户确认选型结果。",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"keyword": {
+						"type": "string",
+						"description": "器件搜索关键词（必填）。"
+					},
+					"limit": {
+						"type": "number",
+						"description": "返回候选数量上限，范围 2-20，默认 20。"
+					}
+				},
+				"required": ["keyword"]
+			}
+		}
+	},
+	{
+		"type": "function",
+		"function": {
+			"name": "component_place",
+			"description": "引导用户交互放置已确认的器件列表。",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"components": {
+						"type": "array",
+						"description": "待放置器件数组（必填），按最终放置顺序排列。每个器件必须提供 uuid 和 libraryUuid。",
+						"items": {
+							"type": "object",
+							"properties": {
+								"uuid": {
+									"type": "string",
+									"description": "器件 UUID（必填）。"
+								},
+								"libraryUuid": {
+									"type": "string",
+									"description": "器件所属库 UUID（必填）。"
+								},
+								"name": {
+									"type": "string",
+									"description": "器件名称（可选）。"
+								},
+								"footprintName": {
+									"type": "string",
+									"description": "封装名称（可选）。"
+								},
+								"subPartName": {
+									"type": "string",
+									"description": "多子部件器件的子部件名称（可选）。"
+								}
+							}
+						}
+					},
+					"timeoutSeconds": {
+						"type": "number",
+						"description": "单个器件放置超时时间（可选），单位秒，范围 30~180，默认 60。"
+					}
+				},
+				"required": ["components"]
+			}
+		}
+	}
+]
