@@ -1,0 +1,45 @@
+COMMIT_MSG.txt
+  s_5401a8966ba772::t_86f53becf3b687 1-15
+src/index.ts
+  s_5401a8966ba772::t_91b8c559492fee 40
+  s_5401a8966ba772::t_6e8837ed736f96 30
+src/chat.ts
+  s_5401a8966ba772::t_9f0a25187d9bbe 29
+  s_5401a8966ba772::t_ddf001d378d466 34
+  s_5401a8966ba772::t_80ac15cac9cf2b 37
+src/llm/agent/instructions.ts
+  s_5401a8966ba772::t_9ef2a84911e2b0 4
+src/config.ts
+  s_5401a8966ba772::t_c4f59df1630ba4 9-10
+src/page/model.ts
+  s_5401a8966ba772::t_4a03a2cb8c36fe 7,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "062e954a9d12672c58d2d376b475250ac9ea779e",
+  "prompts": {},
+  "sessions": {
+    "s_5401a8966ba772": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a7f2def9798ae252f9c1a0f",
+        "model": "glm-5.2"
+      },
+      "human_author": "metrogg <146624525+metrogg@users.noreply.github.com>",
+      "custom_attributes": {
+        "dedupe_key": "6a7f2def9798ae252f9c1a0f:6a826cf79798ae252f9c2bf7:afterEdit:c326a9ab",
+        "external_session_id": "6a7f2def9798ae252f9c1a0f",
+        "session_id": "6a7f2def9798ae252f9c1a0f",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "client_type": "ide",
+        "tool_use_id": "6a826cf79798ae252f9c2bf7",
+        "tool_type": "builtin",
+        "edit_kind": "file_edit",
+        "runtime_client": "trae-tob-git-ai",
+        "source_scene": "agent",
+        "operation_id": "6a826cf79798ae252f9c2bf7"
+      }
+    }
+  }
+}
