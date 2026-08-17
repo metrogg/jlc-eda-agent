@@ -1,0 +1,162 @@
+build/packaged.ts
+  s_5401a8966ba772::t_d60d62dabc320d 1-95
+src/llm/adapters/types.ts
+  s_5401a8966ba772::t_3b3784b85416e2 1-179
+src/tools/eda-context.ts
+  s_5401a8966ba772::t_a8bc8e97a84e17 1-63
+src/llm/adapters/deepseek.ts
+  s_5401a8966ba772::t_4df6e63b1af01f 1-53
+src/platform/platform.json
+  s_5401a8966ba772::t_81696a826278cd 1-75
+src/tools/api-search.ts
+  s_5401a8966ba772::t_54dfb264118f64 1-275
+iframe/model-config.css
+  s_5401a8966ba772::t_482dd2f5b71813 1-1075
+src/page/model.ts
+  s_5401a8966ba772::t_b39a1358559ba0 1-162
+src/tools/api-index.ts
+  s_5401a8966ba772::t_25fa05b6775a48 1-180
+src/llm/stream.ts
+  s_5401a8966ba772::t_3daa14f9e450b6 1-328
+build/dist/.gitignore
+  s_5401a8966ba772::t_bb341f89971aa3 1-2
+CHANGELOG.md
+  s_5401a8966ba772::t_a0a398128e8da4 1-150
+src/tools/schematic-read.ts
+  s_5401a8966ba772::t_0e41a203558887 1-335
+eslint.config.mjs
+  s_5401a8966ba772::t_73a4974a2c7469 1-13
+src/tools/component-select-ui.ts
+  s_5401a8966ba772::t_685fd31faf76fe 1-1124
+src/page/theme.ts
+  s_5401a8966ba772::t_123087e2e36137 1-403
+src/llm/agent/instructions.ts
+  s_5401a8966ba772::t_4a910e5f242e14 1-138
+src/chat.ts
+  s_5401a8966ba772::t_2b3ed7ada15c9a 1-3158
+src/tools/component-select.ts
+  s_5401a8966ba772::t_335d24661edce1 1-242
+src/index.ts
+  s_5401a8966ba772::t_5e08362a53663b 1-44
+src/tools/component-place.ts
+  s_5401a8966ba772::t_8a74e6b0aae60e 1-182
+src/page/render.ts
+  s_5401a8966ba772::t_a766732d43916f 1-344
+src/chat-vlist/adapter.ts
+  s_5401a8966ba772::t_e409826ad84914 1-503
+.editorconfig
+  s_5401a8966ba772::t_3bd8c247875bf3 1-14
+src/tools/schematic-review.ts
+  s_5401a8966ba772::t_115c5b8fa8e536 1-71
+iframe/index.html
+  s_5401a8966ba772::t_3c87eaf24256c7 1-102
+src/llm/adapters/openai-responses.ts
+  s_5401a8966ba772::t_98602136014185 1-208
+src/page/upload.ts
+  s_5401a8966ba772::t_88fa745bedce38 1-323
+config/esbuild.prod.ts
+  s_5401a8966ba772::t_1954b49900bc90 1-15
+src/llm/adapters/anthropic.ts
+  s_5401a8966ba772::t_8fb7eb12b7e91b 1-189
+src/llm/adapters/openai-chat.ts
+  s_5401a8966ba772::t_211a3b778880ab 1-161
+build/update-build-time.ts
+  s_5401a8966ba772::t_ea02880d4e52cc 1-56
+LICENSE
+  s_5401a8966ba772::t_489bddd082afb9 1-201
+.npmrc
+  s_5401a8966ba772::t_73d9359332ecd8 1-2
+src/chat-vlist/index.ts
+  s_5401a8966ba772::t_1f7464bef0246e 1-22
+src/tools/component-place-ui.ts
+  s_5401a8966ba772::t_e41f39c3c64dc5 1-1000
+.edaignore
+  s_5401a8966ba772::t_456366adfb028f 1-18
+src/tools/api-invoke.ts
+  s_5401a8966ba772::t_174409b3f40712 1-151
+src/session/session.ts
+  s_5401a8966ba772::t_ae274d8d31e161 1-939
+src/page/chat-copy.ts
+  s_5401a8966ba772::t_89d7301180ae9d 1-246
+src/config.ts
+  s_5401a8966ba772::t_c929192d503bdc 1-925
+src/platform/platform.ts
+  s_5401a8966ba772::t_e23d4f9b873932 1-181
+src/tools/executor.ts
+  s_5401a8966ba772::t_fce41150953f0f 1-500
+src/chat-vlist/types.ts
+  s_5401a8966ba772::t_1fd217b50c5f45 1-93
+iframe/common.css
+  s_5401a8966ba772::t_8b8d4772ac7eec 1-144
+images/logo.svg
+  s_5401a8966ba772::t_f7b2742f1d978a 1-83
+iframe/overlayscrollbars.css
+  s_5401a8966ba772::t_76014ead5f1bd9 1-670
+iframe/jlceda-pro-api-doc.json
+  s_5401a8966ba772::t_eda59b6914cd8f 1-109717
+src/chat-vlist/store.ts
+  s_5401a8966ba772::t_74f717461db950 1-271
+tsconfig.json
+  s_5401a8966ba772::t_13320b159fd479 1-29
+.gitignore
+  s_5401a8966ba772::t_e69498cf54892d 1-8
+src/debug.ts
+  s_5401a8966ba772::t_091f218155b3fc 1-298
+src/llm/client.ts
+  s_5401a8966ba772::t_8b8a286afc2ace 1-26
+src/tools/todo_list.ts
+  s_5401a8966ba772::t_1c57d6ff08bc5f 1-141
+src/llm/adapters/factory.ts
+  s_5401a8966ba772::t_1c483634cc9ba7 1-34
+iframe/model-config.html
+  s_5401a8966ba772::t_50d09764a4c444 1-95
+iframe/icons.svg
+  s_5401a8966ba772::t_01ae99d293aada 1-137
+src/utils.ts
+  s_5401a8966ba772::t_948d072b617055 1-222
+locales/extensionJson/zh-Hans.json
+  s_5401a8966ba772::t_553b5410ee159a 1-3
+src/chat-vlist/renderer.ts
+  s_5401a8966ba772::t_c6a6aeda25050f 1-269
+iframe/chat.css
+  s_5401a8966ba772::t_a2fb4145173f15 1-1939
+src/llm/agent/runtime.ts
+  s_5401a8966ba772::t_49cb6cf3599b63 1-25
+.gitattributes
+  s_5401a8966ba772::t_523af37486b42f 1
+locales/extensionJson/en.json
+  s_5401a8966ba772::t_0aa69791e5ae99 1-3
+config/esbuild.common.ts
+  s_5401a8966ba772::t_1a9946ed92208e 1-23
+src/tools/tools.json
+  s_5401a8966ba772::t_75ad496eb93430 1-204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "3ab9cea225f6096457d472fcb6fbfe7d312d86b5",
+  "prompts": {},
+  "sessions": {
+    "s_5401a8966ba772": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a7f2def9798ae252f9c1a0f",
+        "model": "glm-5.2"
+      },
+      "human_author": null,
+      "custom_attributes": {
+        "operation_id": "6a826af69798ae252f9c2b9c",
+        "source_scene": "agent",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "edit_kind": "file_edit",
+        "runtime_client": "trae-tob-git-ai",
+        "dedupe_key": "6a7f2def9798ae252f9c1a0f:6a826af69798ae252f9c2b9c:afterEdit:c326a9ab",
+        "session_id": "6a7f2def9798ae252f9c1a0f",
+        "tool_use_id": "6a826af69798ae252f9c2b9c",
+        "external_session_id": "6a7f2def9798ae252f9c1a0f",
+        "tool_type": "builtin",
+        "client_type": "ide"
+      }
+    }
+  }
+}
